@@ -4,10 +4,11 @@
 using namespace std;
 const int N = 4;
 const int WIDTH = 5;
+#define TARGET 2048
 const int S_FAIL = 0;
 const int S_WIN = 1;
 const int S_NORMAL = 2;
-const int S_QUIT = 0;
+const int S_QUIT = 3;
 class Cpp2048 {
 public:
     Cpp2048()
@@ -15,17 +16,42 @@ public:
     {
         setTestData();
     }
-    ~Cpp2048();
     int getStatus() { return status; }
     void processInput()
     {
         char ch = getch();
         ch = toupper(ch);
         if (status == S_NORMAL) {
+            bool updated = false;
             if (ch == 'A') {
                 moveLeft();
+            } else if (ch == 'S') {
+                rotate();
+                rotate();
+                rotate();
+                updated = moveLeft();
+                rotate();
+            } else if (ch == 'D') {
+                rotate();
+                rotate();
+                updated = moveLeft();
+                rotate();
+                rotate();
+            } else if (ch == 'W') {
+                rotate();
+                updated = moveLeft();
+                rotate();
+                rotate();
+                rotate();
+            }
+            if (updated) {
+                randNew();
+                if (isOver()) {
+                    status = S_FAIL;
+                }
             }
         }
+
         if (ch == 'Q') {
             status = S_QUIT;
         } else if (ch == 'R') {
@@ -51,7 +77,7 @@ public:
             }
         }
         mvprintw(2 * N + 2, (5 * (N - 4) - 1) / 2, "W(up),S(down),A(left),D(right),R(restart),Q(quit)");
-        mvprintw(2 * N + 3, 12 + 5 * (N - 4) / 2, "reedthink");
+        mvprintw(2 * N + 3, 12 + 5 * (N - 4) / 2, "By reedthink");
         if (status == S_WIN) {
             mvprintw(N, 5 * N / 2 - 1, "WIN!Press R to continue.");
         } else if (status == S_FAIL) {
@@ -62,12 +88,24 @@ public:
     {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                data[i][j] = 16 << i << j;
+                data[i][j] = 16 << (i + j);
             }
         }
     }
 
 private:
+    bool isOver()
+    {
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if ((j + 1 < N) && (data[i][j] * data[i][j + 1] == 0 || data[i][j] == data[i][j + 1]))
+                    return false;
+                if ((i + 1 < N) && (data[i][j] * data[i + 1][j] == 0 || data[i][j] == data[i + 1][j]))
+                    return false;
+            }
+        }
+        return true;
+    }
     void drawItem(int row, int col, char c)
     {
         move(row, col);
@@ -116,22 +154,26 @@ private:
         data[value / N][value % N] = rand() % 10 == 1 ? 4 : 2;
         return true;
     }
-    void moveLeft()
+    bool moveLeft()
     {
+        int tmp[N][N];
         for (int i = 0; i < N; i++) {
             int currentWritePos = 0;
             int lastValue = 0;
             for (int j = 0; j < N; j++) {
+                tmp[i][j] = data[i][j];
                 if (data[i][j] == 0) {
                     continue;
                 }
-                if (lastValue == 0) {
+                if (lastValue == 0)
                     lastValue = data[i][j];
-
-                } else {
+                else {
                     if (lastValue == data[i][j]) {
                         data[i][currentWritePos] = lastValue * 2;
                         lastValue = 0;
+                        if (data[i][currentWritePos] == TARGET) {
+                            status = S_WIN;
+                        }
                     } else {
                         data[i][currentWritePos] = lastValue;
                         lastValue = data[i][j];
@@ -144,12 +186,30 @@ private:
                 data[i][currentWritePos] = lastValue;
             }
         }
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (data[i][j] != tmp[i][j])
+                    return true;
+            }
+        }
+        return false;
+    }
+    void rotate()
+    {
+        int tmp[N][N] = { 0 };
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                tmp[i][j] = data[j][N - 1 - i];
+            }
+        }
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                data[i][j] = tmp[i][j];
+            }
+        }
     }
 };
 
-Cpp2048::~Cpp2048()
-{
-}
 
 void initialize()
 {
