@@ -54,7 +54,7 @@ public:
 
         if (ch == 'Q') {
             status = S_QUIT;
-        } else if (ch == 'R') {
+        } else if (ch == 'R'||ch=='B') {
             restart();
         }
     }
@@ -76,7 +76,7 @@ public:
                 }
             }
         }
-        mvprintw(2 * N + 2, (5 * (N - 4) - 1) / 2, "W(up),S(down),A(left),D(right),R(restart),Q(quit)");
+        mvprintw(2 * N + 2, (5 * (N - 4) - 1) / 2, "B(begin),W(up),S(down),A(left),D(right),R(restart),Q(quit)");
         mvprintw(2 * N + 3, 12 + 5 * (N - 4) / 2, "By reedthink");
         if (status == S_WIN) {
             mvprintw(N, 5 * N / 2 - 1, "WIN!Press R to continue.");
@@ -210,7 +210,6 @@ private:
     }
 };
 
-
 void initialize()
 {
     //初始化curses
@@ -233,7 +232,7 @@ int main()
     initialize();
 
     Cpp2048 game;
-    char ch = 'n';
+    
     do {
         game.draw();
         game.processInput();
