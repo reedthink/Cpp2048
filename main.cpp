@@ -1,6 +1,7 @@
 #include <curses.h>
 #include <string>
 #include <vector>
+#include <ctime>
 using namespace std;
 const int N = 4;
 const int WIDTH = 5;

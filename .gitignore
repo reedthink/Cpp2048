@@ -1,2 +1,4 @@
 2.cpp
 2048
+build/
+.vscode/
